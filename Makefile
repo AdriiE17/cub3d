@@ -6,7 +6,7 @@
 #    By: victor <marvin@42.fr>                      +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/03/04 19:37:02 by victor            #+#    #+#              #
-#    Updated: 2025/03/26 20:46:52 by victor           ###   ########.fr        #
+#    Updated: 2025/03/29 13:52:36 by victor           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -22,7 +22,8 @@ SRC_DIR_BONUS = ./src/bonus
 
 # Lista de archivos fuente
 SRC = $(SRC_DIR)/cub3D.c $(SRC_DIR)/camera.c $(SRC_DIR)/collition.c $(SRC_DIR)/parse.c \
-	  $(SRC_DIR)/render.c $(SRC_DIR)/cub3D_utils.c
+	  $(SRC_DIR)/render.c $(SRC_DIR)/cub3D_utils.c	$(SRC_DIR)/validate_map.c \
+	  $(SRC_DIR)/parse_utils.c $(SRC_DIR)/render_utils.c $(SRC_DIR)/raycasting.c
 
 BONUS_SRC = $(SRC_DIR_BONUS)/cub3D_bonus.c
 

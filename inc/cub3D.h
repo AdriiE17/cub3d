@@ -6,7 +6,7 @@
 /*   By: vberdugo <vberdugo@student.42barcelon      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/15 11:48:08 by vberdugo          #+#    #+#             */
-/*   Updated: 2025/03/26 20:09:04 by victor           ###   ########.fr       */
+/*   Updated: 2025/03/29 13:56:30 by victor           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,6 +40,27 @@ typedef struct s_camera
 	double	move_speed;
 	double	rot_speed;
 }	t_camera;
+
+typedef struct s_ray
+{
+	t_vec2	raydir;
+	int		map_x;
+	int		map_y;
+	t_vec2	deltadist;
+	t_vec2	sidedist;
+	t_vec2	step;
+	int		side;
+	double	perpwalldist;
+}	t_ray;
+
+typedef struct s_draw
+{
+	int				lh;
+	int				ds;
+	int				de;
+	int				tx;
+	mlx_texture_t	*tex;
+}	t_draw;
 
 typedef struct s_game
 {
@@ -91,5 +112,11 @@ int		load_map(char *filename, char ***lines, int *line_count);
 void	free_map_lines(char **lines, int line_count);
 int		init_app_struct(t_app *app, char **lines, int line_count);
 void	cleanup(t_app *app);
+void	validate_map(t_game *game, t_camera *camera);
+void	ft_draw_background(t_app *app);
+void	draw_pixels(t_app *app, int x, t_draw *draw);
+void	init_ray(t_app *app, int x, t_ray *ray);
+void	do_dda(t_app *app, t_ray *ray);
+void	compute_draw_boundaries(t_draw *draw, t_ray *ray);
 
 #endif
