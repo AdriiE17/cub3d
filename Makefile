@@ -6,7 +6,7 @@
 #    By: victor <marvin@42.fr>                      +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/03/04 19:37:02 by victor            #+#    #+#              #
-#    Updated: 2025/04/15 17:19:50 by vberdugo         ###   ########.fr        #
+#    Updated: 2025/04/16 20:14:32 by aescande         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -41,7 +41,8 @@ BONUS_SRC =	$(SRC_DIR_BONUS)/cub3D.c \
 			$(SRC_DIR_BONUS)/validate_map.c \
 			$(SRC_DIR_BONUS)/parse_utils.c \
 			$(SRC_DIR_BONUS)/render_utils.c \
-			$(SRC_DIR_BONUS)/raycasting.c
+			$(SRC_DIR_BONUS)/raycasting.c \
+			$(SRC_DIR_BONUS)/quaternions.c
 
 # Manual conversion of sources to object files
 OBJ       = $(SRC:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)

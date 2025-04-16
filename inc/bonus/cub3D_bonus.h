@@ -6,7 +6,7 @@
 /*   By: vberdugo <vberdugo@student.42barcelon      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/15 11:48:08 by vberdugo          #+#    #+#             */
-/*   Updated: 2025/04/16 11:56:42 by victor           ###   ########.fr       */
+/*   Updated: 2025/04/16 20:23:26 by aescande         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,34 +26,38 @@
 # define HEIGHT 1080
 # define COLLISION_RADIUS 0.2
 
-typedef struct s_vec2
+typedef struct s_quaternion
 {
-	double	x;
-	double	y;
-}	t_vec2;
+	double	s;
+	double	i;
+	double	j;
+	double	k;
+}	t_quaternion;
 
 typedef struct s_camera
 {
-	t_vec2	pos;
-	t_vec2	dir;
-	t_vec2	plane;
-	double	move_speed;
-	double	rot_speed;
-	double	view_z;
+	t_quaternion	pos;
+	t_quaternion	dir;
+	t_quaternion	plane;
+	double			move_speed;
+	double			rot_speed;
+	double			view_z;
 }	t_camera;
+
 
 typedef struct s_ray
 {
-	t_vec2	raydir;
-	double	raydir_mod;
-	int		map_x;
-	int		map_y;
-	t_vec2	deltadist;
-	t_vec2	sidedist;
-	t_vec2	step;
-	int		side;
-	double	perpwalldist;
+	t_quaternion	raydir;
+	double			raydir_mod;
+	int				map_x;
+	int				map_y;
+	t_quaternion	deltadist;
+	t_quaternion	sidedist;
+	t_quaternion	step;
+	int				side;
+	double			perpwalldist;
 }	t_ray;
+
 
 typedef struct s_draw
 {
@@ -104,22 +108,24 @@ typedef struct s_collision
 	double	dy;
 }	t_collision;
 
-void	process_lines(char **lines, int count, t_game *game, t_camera *camera);
-int		read_lines(const char *filename, char ***lines, int *line_count);
-char	safe_get_tile(t_game *game, int x, int y);
-int		collides(t_game *game, double new_x, double new_y);
-void	render_scene(void *param);
-void	move_camera(void *param);
-void	close_window(void *param);
-int		load_map(char *filename, char ***lines, int *line_count);
-void	free_map_lines(char **lines, int line_count);
-int		init_app_struct(t_app *app, char **lines, int line_count);
-void	cleanup(t_app *app);
-void	validate_map(t_game *game, t_camera *camera);
-void	ft_draw_background(t_app *app);
-void	draw_pixels(t_app *app, int x, t_draw *draw);
-void	init_ray(t_app *app, int x, t_ray *ray);
-void	do_dda(t_app *app, t_ray *ray);
-char	*skip_spaces(char *s);
+void			process_lines(char **lines, int count, t_game *game, t_camera *camera);
+int				read_lines(const char *filename, char ***lines, int *line_count);
+char			safe_get_tile(t_game *game, int x, int y);
+int				collides(t_game *game, double new_x, double new_y);
+void			render_scene(void *param);
+void			move_camera(void *param);
+void			close_window(void *param);
+int				load_map(char *filename, char ***lines, int *line_count);
+void			free_map_lines(char **lines, int line_count);
+int				init_app_struct(t_app *app, char **lines, int line_count);
+void			cleanup(t_app *app);
+void			validate_map(t_game *game, t_camera *camera);
+void			ft_draw_background(t_app *app);
+void			draw_pixels(t_app *app, int x, t_draw *draw);
+void			init_ray(t_app *app, int x, t_ray *ray);
+void			do_dda(t_app *app, t_ray *ray);
+char			*skip_spaces(char *s);
+t_quaternion	quaternion_product(t_quaternion	p, t_quaternion q);
+t_quaternion	plane_rotation(t_quaternion p, t_quaternion axis, double alpha);
 
 #endif

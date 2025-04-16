@@ -6,7 +6,7 @@
 /*   By: victor <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/28 21:58:25 by victor            #+#    #+#             */
-/*   Updated: 2025/04/16 11:54:28 by victor           ###   ########.fr       */
+/*   Updated: 2025/04/16 20:25:21 by aescande         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -106,27 +106,27 @@ static void	set_camera(t_camera *camera, char dir, int x, int y)
 
 	FOV = 86 * (M_PI/180);
 	plane = tan(FOV/2); // dir * tan(FOV/2), dir = 1
-	camera->pos.x = x + 0.5;
-	camera->pos.y = y + 0.5;
+	camera->pos.i = x + 0.5;
+	camera->pos.j = y + 0.5;
 	if (dir == 'N')
 	{
-		camera->dir = (t_vec2){0, -1};
-		camera->plane = (t_vec2){plane, 0};
+		camera->dir = (t_quaternion){0, 0, -1, 0};
+		camera->plane = (t_quaternion){0, plane, 0, 0};
 	}
 	else if (dir == 'S')
 	{
-		camera->dir = (t_vec2){0, 1};
-		camera->plane = (t_vec2){-plane, 0};
+		camera->dir = (t_quaternion){0, 0, 1, 0};
+		camera->plane = (t_quaternion){0, -plane, 0, 0};
 	}
 	else if (dir == 'E')
 	{
-		camera->dir = (t_vec2){1, 0};
-		camera->plane = (t_vec2){0, plane};
+		camera->dir = (t_quaternion){0, 1, 0, 0};
+		camera->plane = (t_quaternion){0, 0, plane, 0};
 	}
 	else if (dir == 'W')
 	{
-		camera->dir = (t_vec2){-1, 0};
-		camera->plane = (t_vec2){0, -plane};
+		camera->dir = (t_quaternion){0, -1, 0, 0};
+		camera->plane = (t_quaternion){0, 0, -plane, 0};
 	}
 	camera->view_z = 0;
 }
