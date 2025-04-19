@@ -6,7 +6,7 @@
 /*   By: victor <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/26 18:23:15 by victor            #+#    #+#             */
-/*   Updated: 2025/04/18 18:54:34 by victor           ###   ########.fr       */
+/*   Updated: 2025/04/18 21:07:39 by victor           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,92 +33,6 @@ static void	compute_draw_boundaries(t_draw *draw, t_ray *ray, t_app *app)
 		draw->de = HEIGHT - 1;
 }
 
-static void	compute_texture_params(t_app *app, t_ray *ray, t_draw *draw)
-{
-	double			wallx;
-	mlx_texture_t	*tex;
-	t_door			*door;
-
-	tex = NULL;
-	door = NULL;
-	if (ray->side == 0)
-		wallx = app->camera.pos.y + ray->perpwalldist * ray->raydir.y;
-	else
-		wallx = app->camera.pos.x + ray->perpwalldist * ray->raydir.x;
-	wallx -= floor(wallx);
-	if (ray->hit_tile == '2' || ray->hit_tile == '3')
-	{
-		for (int i = 0; i < app->game.door_count; i++)
-		{
-			t_door *d = &app->game.doors[i];
-			if (d->x == ray->map_x && d->y == ray->map_y)
-			{
-				door = d;
-				break;
-			}
-		}
-	}
-	if (door)
-	{
-		bool panel_face = (door->orientation == '2' && ray->side == 1)
-			|| (door->orientation == '3' && ray->side == 0);
-		if (panel_face)
-		{
-			double dir = (door->orientation == '2') ? -1.0 : +1.0;
-			wallx = fmod(wallx + dir * door->open_offset + 1.0, 1.0);
-			tex   = app->game.tex_door;
-		}
-		else
-		{
-			tex = app->game.tex_door_w;
-		}
-	}
-	if (!tex)
-	{
-		if (ray->hit_tile == '1')
-		{
-			bool use_frame = false;
-			if (ray->side == 0)
-			{
-				int adjX = ray->map_x - ray->step.x;
-				int adjY = ray->map_y;
-				char adj = safe_get_tile(&app->game, adjX, adjY);
-				if (adj == '2')
-					use_frame = true;
-			}
-			else
-			{
-				int adjX = ray->map_x;
-				int adjY = ray->map_y - ray->step.y;
-				char adj = safe_get_tile(&app->game, adjX, adjY);
-				if (adj == '3')
-					use_frame = true;
-			}
-			if (use_frame)
-			{
-				tex = app->game.tex_door_w;
-			}
-			else
-			{
-				if (ray->side == 0)
-					tex = (ray->raydir.x < 0) ? app->game.tex_we : app->game.tex_ea;
-				else
-					tex = (ray->raydir.y < 0) ? app->game.tex_no : app->game.tex_so;
-			}
-		}
-	}
-	draw->tex = tex;
-	if (!tex)
-		return;
-	draw->tx = (int)(wallx * tex->width);
-	if ((ray->side == 0 && ray->raydir.x > 0) ||
-			(ray->side == 1 && ray->raydir.y < 0)) {
-		draw->tx = tex->width - draw->tx - 1;
-	}
-	draw->tx %= tex->width;
-	if (draw->tx < 0)
-		draw->tx += tex->width;
-}
 /* ************************************************************************** */
 /*                                                                            */
 /*   Renders a column of pixels for the given ray at the specified X.        */
@@ -137,7 +51,7 @@ static void	render_column(t_app *app, int x, t_ray *ray)
 	compute_draw_boundaries(&draw, ray, app);
 	compute_texture_params(app, ray, &draw);
 	if (!draw.tex)
-		return;
+		return ;
 	app->z_buffer[x] = ray->perpwalldist;
 	draw_pixels(app, x, &draw);
 }
@@ -152,44 +66,65 @@ static void	render_column(t_app *app, int x, t_ray *ray)
 /*   - The function calls `render_column()` to draw each vertical line.      */
 /*                                                                            */
 /* ************************************************************************** */
-void	render_scene(void *param)
+static void	sort_enemies_by_distance(t_enemy **enemies, int count, t_app *a)
 {
-	t_app	*app;
-	int		x;
-	t_ray	ray;
+	int		i;
+	int		j;
+	t_enemy	*temp;
 
-	app = (t_app *)param;
-	ft_draw_background(app);
-	x = 0;
-	while (x < WIDTH)
+	i = -1;
+	while (++i < count - 1)
 	{
-		init_ray(app, x, &ray);
-		do_dda(app, &ray);
-		render_column(app, x, &ray);
-		x++;
-	}
-	render_minimap(app);
-	t_enemy **sorted_enemies = malloc(app->game.enemy_count * sizeof(t_enemy*));
-	for (int i = 0; i < app->game.enemy_count; i++)
-		sorted_enemies[i] = &app->game.enemies[i];
-
-	for (int i = 0; i < app->game.enemy_count - 1; i++) {
-		for (int j = 0; j < app->game.enemy_count - i - 1; j++) {
-			double dist1 = hypot(sorted_enemies[j]->pos_x - app->camera.pos.x,
-					sorted_enemies[j]->pos_y - app->camera.pos.y);
-			double dist2 = hypot(sorted_enemies[j+1]->pos_x - app->camera.pos.x,
-					sorted_enemies[j+1]->pos_y - app->camera.pos.y);
-			if (dist1 < dist2) {
-				t_enemy *temp = sorted_enemies[j];
-				sorted_enemies[j] = sorted_enemies[j+1];
-				sorted_enemies[j+1] = temp;
+		j = -1;
+		while (++j < count - i - 1)
+		{
+			if (hypot(enemies[j]->pos_x - a->camera.pos.x,
+					enemies[j]->pos_y - a->camera.pos.y)
+				< hypot(enemies[j + 1]->pos_x - a->camera.pos.x,
+					enemies[j + 1]->pos_y - a->camera.pos.y))
+			{
+				temp = enemies[j];
+				enemies[j] = enemies[j + 1];
+				enemies[j + 1] = temp;
 			}
 		}
 	}
-	for (int i = 0; i < app->game.enemy_count; i++) {
-		if (sorted_enemies[i]->is_active)
-			render_enemy(app, sorted_enemies[i]);
-	}
-	free(sorted_enemies);
+}
 
+static void	sort_and_render(t_app *a)
+{
+	t_enemy	**sorted;
+	int		i;
+
+	sorted = malloc(a->game.enemy_count * sizeof(t_enemy *));
+	if (!sorted)
+		return ;
+	i = -1;
+	while (++i < a->game.enemy_count)
+		sorted[i] = &a->game.enemies[i];
+	sort_enemies_by_distance(sorted, a->game.enemy_count, a);
+	i = -1;
+	while (++i < a->game.enemy_count)
+		if (sorted[i]->is_active)
+			render_enemy(a, sorted[i]);
+	free(sorted);
+}
+
+void	render_scene(void *param)
+{
+	t_app	*a;
+	int		x;
+	t_ray	r;
+
+	a = param;
+	ft_draw_background(a);
+	x = -1;
+	while (++x < WIDTH)
+	{
+		init_ray(a, x, &r);
+		do_dda(a, &r);
+		render_column(a, x, &r);
+	}
+	render_minimap(a);
+	sort_and_render(a);
 }

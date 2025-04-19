@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   collition.c                                        :+:      :+:    :+:   */
+/*   collition_bonus.c                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: victor <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/26 18:17:00 by victor            #+#    #+#             */
-/*   Updated: 2025/04/18 14:16:50 by victor           ###   ########.fr       */
+/*   Updated: 2025/04/18 20:38:20 by victor           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -124,30 +124,45 @@ static int	check_cell_collision(double new_x, double new_y,
 /*     it returns `0` (false).                                                */
 /*                                                                            */
 /* ************************************************************************** */
-int	collides(t_game *game, double new_x, double new_y)
+static int	check_collision(t_game *g, int j, int i, t_vec2 pos)
+{
+	int			d;
+	t_collision	c;
+
+	c.j = j;
+	c.i = i;
+	d = -1;
+	while (++d < g->door_count)
+	{
+		if (g->doors[d].x == j && g->doors[d].y == i
+			&& !g->doors[d].is_open
+			&& check_cell_collision(pos.x, pos.y, &c))
+			return (1);
+	}
+	return (0);
+}
+
+int	collides(t_game *g, double x, double y)
 {
 	t_collision	c;
-	int			d;
+	t_vec2		pos;
 
-	init_collision(&c, new_x, new_y);
+	pos.x = x;
+	pos.y = y;
+	init_collision(&c, x, y);
 	c.i = c.min_i - 1;
 	while (++c.i <= c.max_i)
 	{
 		c.j = c.min_j - 1;
 		while (++c.j <= c.max_j)
 		{
-			if (safe_get_tile(game, c.j, c.i) == '1'
-				&& check_cell_collision(new_x, new_y, &c))
+			if (safe_get_tile(g, c.j, c.i) == '1'
+				&& check_cell_collision(x, y, &c))
 				return (1);
-			if (safe_get_tile(game, c.j, c.i) == '2'
-				|| safe_get_tile(game, c.j, c.i) == '3')
-			{
-				d = -1;
-				while (++d < game->door_count)
-					if (game->doors[d].x == c.j && game->doors[d].y == c.i
-						&& !game->doors[d].is_open)
-						return (1);
-			}
+			if ((safe_get_tile(g, c.j, c.i) == '2'
+					|| safe_get_tile(g, c.j, c.i) == '3')
+				&& check_collision(g, c.j, c.i, pos))
+				return (1);
 		}
 	}
 	return (0);

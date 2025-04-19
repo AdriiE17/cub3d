@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   render_utils.c                                     :+:      :+:    :+:   */
+/*   render_utils_bonus.c                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: victor <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/29 13:20:35 by victor            #+#    #+#             */
-/*   Updated: 2025/04/17 02:16:24 by victor           ###   ########.fr       */
+/*   Updated: 2025/04/18 21:29:25 by victor           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,11 +34,14 @@ void	ft_draw_background(t_app *app)
 		horizon = 0;
 	if (horizon > HEIGHT)
 		horizon = HEIGHT;
-	for (x = 0; x < WIDTH; x++)
+	x = -1;
+	while (++x < WIDTH)
 	{
-		for (y = 0; y < horizon; y++)
+		y = -1;
+		while (++y < horizon)
 			mlx_put_pixel(app->image, x, y, ceiling_color);
-		for (y = horizon; y < HEIGHT; y++)
+		y = horizon - 1;
+		while (++y < HEIGHT)
 			mlx_put_pixel(app->image, x, y, floor_color);
 	}
 }
@@ -77,18 +80,18 @@ void	draw_pixels(t_app *app, int x, t_draw *draw)
 	int			d;
 	int			ty;
 	uint32_t	px;
-	
+
 	y = draw->ds;
-    while (y < draw->de)
-    {
-        d = (y + app->camera.view_z) * 256 - HEIGHT * 128 + draw->lh * 128;
-        ty = ((d * draw->tex->height) / draw->lh) / 256;
-        ty = ty % draw->tex->height;
-        if (ty < 0)
-            ty += draw->tex->height;
-        px = ((uint32_t *)draw->tex->pixels)[ty * draw->tex->width + draw->tx];
-        px = convert_pixel(px);
-        mlx_put_pixel(app->image, x, y, px);
-        y++;
-    }
+	while (y < draw->de)
+	{
+		d = (y + app->camera.view_z) * 256 - HEIGHT * 128 + draw->lh * 128;
+		ty = ((d * draw->tex->height) / draw->lh) / 256;
+		ty = ty % draw->tex->height;
+		if (ty < 0)
+			ty += draw->tex->height;
+		px = ((uint32_t *)draw->tex->pixels)[ty * draw->tex->width + draw->tx];
+		px = convert_pixel(px);
+		mlx_put_pixel(app->image, x, y, px);
+		y++;
+	}
 }

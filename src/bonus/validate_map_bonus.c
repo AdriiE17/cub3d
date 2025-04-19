@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   validate_map.c                                     :+:      :+:    :+:   */
+/*   validate_map_bonus.c                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: victor <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/28 21:58:25 by victor            #+#    #+#             */
-/*   Updated: 2025/04/18 10:42:43 by victor           ###   ########.fr       */
+/*   Updated: 2025/04/18 21:47:07 by victor           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -97,15 +97,13 @@ static void	validate_borders(char *line, int is_border)
 /*     - West ('W') has direction (-1, 0) and plane (0, -0.66).              */
 /*   - The camera's direction vector defines which way it faces.             */
 /*   - The plane vector helps in calculating the view direction for the ray. */
-/*                                                                            */
+//*    double	fov; fov = 60 * (M_PI / 180);// dir * tan(FOV/2), dir = 1    */
 /* ************************************************************************** */
 static void	set_camera(t_camera *camera, char dir, int x, int y)
 {
-	double	FOV;
 	double	plane;
 
-	FOV = 86 * (M_PI/180);
-	plane = tan(FOV/2); // dir * tan(FOV/2), dir = 1
+	plane = tan(86 * (M_PI / 180) / 2);
 	camera->pos.x = x + 0.5;
 	camera->pos.y = y + 0.5;
 	if (dir == 'N')
@@ -128,7 +126,6 @@ static void	set_camera(t_camera *camera, char dir, int x, int y)
 		camera->dir = (t_vec2){-1, 0};
 		camera->plane = (t_vec2){0, -plane};
 	}
-	camera->view_z = 0;
 }
 
 /* ************************************************************************** */
@@ -156,38 +153,14 @@ static void	process_row_chars(t_game *g, t_camera *cam, int i, int *count)
 			exit(write(2, "Error\nInvalid character in map\n", 31));
 		if (ft_strchr("NSEW", c))
 		{
-			set_camera(cam, c, j, i);
+			set_camera(cam, g->map[i][j], j, i);
 			(*count)++;
 			g->map[i][j] = '0';
 		}
-		if (c == '2' || c == '3') {
-            g->door_count++;
-            g->doors = realloc(g->doors, sizeof(t_door) * g->door_count);
-            g->doors[g->door_count - 1] = (t_door){
-                .x = j,
-                .y = i,
-                .is_open = 0,
-                .orientation = c,
-                .open_offset = 0.0,
-				.move_progress = DOOR_ANIM_DURATION
-            };
-			g->map[i][j] = '0';
-		}
-		if (c == 'B')
-		{
-			g->enemy_count++;
-			g->enemies = realloc(g->enemies, sizeof(t_enemy) * g->enemy_count);
-			g->enemies[g->enemy_count - 1] = (t_enemy){
-				.pos_x = j + 0.5,
-					.pos_y = i + 0.5,
-					.speed = 0.8,
-					.is_active = 1,
-					.anim_frame = 0.0,
-					.time_since_last_move = 0.0,
-					.radius = 0.7
-			};
-			g->map[i][j] = '0'; 
-		}
+		else if (c == '2' || c == '3')
+			init_door(g, i, j, c);
+		else if (c == 'B')
+			init_enemy(g, i, j);
 	}
 }
 
@@ -208,6 +181,7 @@ void	validate_map(t_game *game, t_camera *camera)
 
 	check_empty_line(game);
 	spawn_count = 0;
+	camera->view_z = 0;
 	i = -1;
 	while (++i < game->map_height)
 	{
